@@ -175,7 +175,6 @@ const responseSchema = `{
                 },
                 "url": {
                   "type": "string",
-                  "format": "uri",
                   "pattern": "^https?://"
                 },
                 "summary": {
@@ -192,7 +191,7 @@ const responseSchema = `{
     "meta": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["inputSummary"],
+      "required": ["inputSummary", "warnings"],
       "properties": {
         "inputSummary": {
           "type": "string",
@@ -210,6 +209,9 @@ const responseSchema = `{
     }
   }
 }`;
+
+// 스키마는 프롬프트에 포함하지 않고, API의 response_format으로만 전달
+const parsedResponseSchema = JSON.parse(responseSchema);
 
 /**
  * 사용자 입력을 바탕으로 프롬프트 템플릿을 생성합니다.
@@ -242,7 +244,7 @@ function createPrompt(data: AnalysisRequest): string {
   }
 
   // 최종 프롬프트 템플릿 구성
-  return `[지시] 아래 "프로젝트 정보"를 바탕으로, 실행 가능한 아키텍처 옵션 3개 생성. 요구 형식과 스키마를 엄격히 준수하고, JSON 외의 모든 텍스트 출력 금지.
+  return `[지시] 아래 "프로젝트 정보"를 바탕으로, 실행 가능한 아키텍처 옵션 3개 생성. JSON 외의 모든 텍스트 출력 금지.
 
 [프로젝트 정보]
 - 프레임워크: ${data.environment.framework}
@@ -263,11 +265,7 @@ ${externalIntegrations}
 - 옵션 수: 3
 - 각 옵션은 상이한 접근 방식일 것
 - 각 옵션의 근거 제공(URL 포함)
-- 모든 수치에 단위를 표기
-
-[스키마]
-아래 JSON Schema에 **정확히** 맞춰 출력하세요(추가 키 금지).
-${responseSchema}`;
+- 모든 수치에 단위를 표기`;
 }
 
 /**
@@ -300,13 +298,21 @@ export async function analyzeWithOpenAI(data: AnalysisRequest): Promise<Analysis
         messages: [
           {
             role: 'system',
-            content: '시니어 아키텍처 컨설턴트. 3개의 서로 다른 기술 옵션을 근거 기반으로 생성. 규칙: 1) 모든 주장에 근거 3-5개(URL 포함) 필수 2) 실무 적용 가능한 구체적 단계 제시 3) 정량 수치는 단위 표기 4) JSON만 출력(마크다운 금지) 5) 제공된 스키마 엄수. 근거 3개 미만 옵션은 제외하고 meta.warnings에 사유 명시.'
+            content: '시니어 아키텍처 컨설턴트. 서로 다른 3가지 기술 옵션을 근거 기반으로 생성. 규칙: 1) 근거 3-5개(URL 포함) 2) 실무 적용 가능한 구체적 단계 제시 3) 정량 수치는 단위 표기. 마크다운 금지.'
           },
           {
             role: 'user',
             content: userPrompt
           }
         ],
+        response_format: {
+          type: 'json_schema',
+          json_schema: {
+            name: 'analysis_result',
+            schema: parsedResponseSchema,
+            strict: true
+          }
+        },
         temperature: 1,
         max_completion_tokens: 16000
       })
