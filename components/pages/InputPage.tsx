@@ -8,7 +8,7 @@ import { Textarea } from '../ui/textarea';
 import { toast } from 'sonner';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
-import { analyzeWithOpenAI, AnalysisRequest } from '@/services/openai';
+import { analyzeWithOpenAI, AnalysisRequest, AnalysisResult } from '@/services/openai';
 
 interface Endpoint {
   id: string;
@@ -36,7 +36,7 @@ interface DatabaseEnvironment {
   cloud: string;
 }
 
-export function InputPage({ onAnalyze }: { onAnalyze: (result?: any) => void }) {
+export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) => void }) {
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [ignoreLoad, setIgnoreLoad] = useState(false);
