@@ -25,11 +25,11 @@ export function OptionCard({ option, isSelected, onViewDetails, onAddToAdr }: Op
 
             <div className="space-y-2 mb-6">
                 <div>
-                    <span className="text-sm font-medium">예상 효과:</span>
+                    <span className="text-sm font-medium">예상 효과</span>
                     <p className="text-sm text-muted-foreground">{option.expectedEffect}</p>
                 </div>
                 <div>
-                    <span className="text-sm font-medium">부작용:</span>
+                    <span className="text-sm font-medium">부작용</span>
                     <p className="text-sm text-muted-foreground">{option.sideEffect}</p>
                 </div>
             </div>
