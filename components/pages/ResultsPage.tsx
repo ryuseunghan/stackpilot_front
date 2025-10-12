@@ -12,13 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from '../ui/table';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select';
 
 const options = [
   {

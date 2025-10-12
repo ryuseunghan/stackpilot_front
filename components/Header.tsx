@@ -1,5 +1,4 @@
 import { Button } from './ui/button';
-import { Badge } from './ui/badge';
 
 interface HeaderProps {
   currentPage: 'input' | 'results' | 'adr';

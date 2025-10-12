@@ -5,10 +5,8 @@ import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Textarea } from '../ui/textarea';
-import { Checkbox } from '../ui/checkbox';
-import { Badge } from '../ui/badge';
 import { toast } from 'sonner';
-import { Plus, Trash2, HelpCircle } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface Endpoint {
