@@ -56,6 +56,161 @@ export interface AnalysisResult {
   };
 }
 
+// JSON Schema 정의
+const responseSchema = `{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["options", "meta"],
+  "properties": {
+    "options": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "tags",
+          "summary",
+          "expectedEffect",
+          "sideEffect",
+          "evidenceCount",
+          "benefits",
+          "sideEffects",
+          "conditions",
+          "steps",
+          "evidence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "kebab-case unique id (예: transactional-outbox)"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 120
+          },
+          "tags": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 5,
+            "items": {
+              "type": "string",
+              "pattern": "^#[^\\\\s#]{2,}$"
+            }
+          },
+          "summary": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 280
+          },
+          "expectedEffect": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 280
+          },
+          "sideEffect": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 280
+          },
+          "evidenceCount": {
+            "type": "integer",
+            "minimum": 3,
+            "maximum": 5
+          },
+          "benefits": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 5,
+            "items": {
+              "type": "string",
+              "minLength": 3
+            }
+          },
+          "sideEffects": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 5,
+            "items": {
+              "type": "string",
+              "minLength": 3
+            }
+          },
+          "conditions": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 5,
+            "items": {
+              "type": "string",
+              "minLength": 3
+            }
+          },
+          "steps": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 7,
+            "items": {
+              "type": "string",
+              "minLength": 3
+            }
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 3,
+            "maxItems": 5,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["title", "url", "summary"],
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "minLength": 3
+                },
+                "url": {
+                  "type": "string",
+                  "format": "uri",
+                  "pattern": "^https?://"
+                },
+                "summary": {
+                  "type": "string",
+                  "minLength": 10,
+                  "maxLength": 240
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inputSummary"],
+      "properties": {
+        "inputSummary": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 500
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        }
+      }
+    }
+  }
+}`;
+
 /**
  * 사용자 입력을 바탕으로 프롬프트 템플릿을 생성합니다.
  *
@@ -111,7 +266,8 @@ ${externalIntegrations}
 - 모든 수치에 단위를 표기
 
 [스키마]
-아래 JSON Schema에 **정확히** 맞춰 출력하세요(추가 키 금지).`;
+아래 JSON Schema에 **정확히** 맞춰 출력하세요(추가 키 금지).
+${responseSchema}`;
 }
 
 /**
@@ -152,7 +308,7 @@ export async function analyzeWithOpenAI(data: AnalysisRequest): Promise<Analysis
           }
         ],
         temperature: 1,
-        max_completion_tokens: 8000
+        max_completion_tokens: 16000
       })
     });
 
