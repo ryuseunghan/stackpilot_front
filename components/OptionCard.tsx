@@ -10,11 +10,8 @@ interface OptionCardProps {
 export function OptionCard({ option, isSelected, onViewDetails, onAddToAdr }: OptionCardProps) {
     return (
         <div className={`border rounded-lg p-6 ${isSelected ? 'border-primary' : 'border-border'}`}>
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex items-start mb-4">
                 <h3 className="text-lg font-medium">{option.name}</h3>
-                <span className="bg-primary/10 text-primary px-2 py-1 rounded text-sm">
-          점수: {option.evidenceCount * 20}
-        </span>
             </div>
 
             <p className="text-muted-foreground mb-4">{option.summary}</p>
