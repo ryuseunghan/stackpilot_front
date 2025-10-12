@@ -1,12 +1,9 @@
-import { X } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetClose,
 } from './ui/sheet';
-import { Button } from './ui/button';
 
 interface EvidencePanelProps {
   open: boolean;
@@ -21,15 +18,13 @@ interface EvidencePanelProps {
 export function EvidencePanel({ open, onOpenChange, evidence }: EvidencePanelProps) {
   return (
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent className="w-full sm:max-w-lg">
+        {/* 좌우 여백 보강 및 스크롤 대응 */}
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto px-6 sm:px-8">
           <SheetHeader className="mb-6">
             <div className="flex items-center justify-between">
-              <SheetTitle>근거 자료</SheetTitle>
-              <SheetClose asChild>
-                <Button variant="ghost" size="icon">
-                  <X className="h-4 w-4" />
-                </Button>
-              </SheetClose>
+              {/* 기본 닫기 버튼과 겹치지 않도록 패딩 */}
+              <SheetTitle className="pr-8">근거 자료</SheetTitle>
+              {/* 커스텀 닫기 버튼 제거 → 기본 닫기 버튼만 사용 */}
             </div>
           </SheetHeader>
 
