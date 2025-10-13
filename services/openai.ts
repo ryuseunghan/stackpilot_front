@@ -294,7 +294,7 @@ export async function analyzeWithOpenAI(data: AnalysisRequest): Promise<Analysis
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-5-nano',
+        model: 'gpt-5-mini',
         messages: [
           {
             role: 'system',

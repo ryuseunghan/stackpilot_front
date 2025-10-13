@@ -49,8 +49,8 @@ export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) 
     { id: '2', name: '매칭 수락', avgRps: '80', peakRps: '300', p50: '1200', p95: '2400' },
   ]);
   const [externals, setExternals] = useState<ExternalIntegration[]>([
-    { id: '1', name: 'sms_provider', criticality: 'non-critical', callType: 'sync', timeout: '1000', retries: '1', idempotencyKey: 'matchRequestId' },
-    { id: '2', name: 'recommendation_api', criticality: 'non-critical', callType: 'sync', timeout: '800', retries: '0', idempotencyKey: '' },
+    { id: '1', name: 'sms_provider', criticality: 'non-critical', callType: 'sync', timeout: '1000', retries: '1', idempotencyKey: '매칭된 각 회원들에게 sms를 전송하는 외부 api' },
+    { id: '2', name: 'recommendation_api', criticality: 'non-critical', callType: 'sync', timeout: '800', retries: '0', idempotencyKey: 'db 상에 있는 회원들 중 이상형 데이터와 가장 유사한 회원을 추천해주는 api' },
   ]);
   const [databases, setDatabases] = useState<DatabaseEnvironment[]>([
     { id: '1', database: 'mysql', version: '8.0', cloud: 'aws-ec2' },
@@ -195,7 +195,7 @@ export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) 
     return {
       environment: {
         framework: framework?.value || 'spring-boot',
-        version: version?.value || '2.7.x',
+        version: version?.value || '2.7.1',
         language: language?.value || 'java',
         runtime: runtime?.value || '11',
         architecture: architectureValue,
@@ -451,7 +451,7 @@ export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) 
                     <Label htmlFor="current-state">현재 기능 상태(as-is) *</Label>
                     <Textarea
                         id="current-state"
-                        defaultValue="매칭 신청 API가 SMS 전송을 동기로 처리하여 p95 응답시간이 1500ms"
+                        defaultValue="매칭 신청 API가 외부 API인 SMS 전송 API를 동기로 처리하여 시간 소요가 크며, SMS 전송 실패 시 매칭 신청까지 실패 됨"
                         rows={2}
                         ref={currentStateRef}
                     />
@@ -461,7 +461,7 @@ export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) 
                     <Label htmlFor="desired-state">희망 개선 사항(to-be) *</Label>
                     <Textarea
                         id="desired-state"
-                        defaultValue="SMS 발송을 비동기로 분리하여 p95 응답시간 800ms 이하로 개선"
+                        defaultValue="매칭 신청 API의 속도를 개선하고, SMS 전송이 실패하더라도 매칭 신청 API는 성공 되게끔 개선"
                         rows={2}
                         ref={desiredStateRef}
                     />
