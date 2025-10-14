@@ -24,7 +24,12 @@ interface DatabaseEnvironment {
   version: string;
 }
 
-export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) => void }) {
+interface InputPageProps {
+  onAnalyze: (result?: AnalysisResult) => void;
+  onLoading: (isLoading: boolean) => void;
+}
+
+export function InputPage({ onAnalyze, onLoading }: InputPageProps) {
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [stepType, setStepType] = useState<'new' | 'refactoring'>('refactoring');
@@ -177,6 +182,7 @@ export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) 
   const handleAnalyzeClick = async () => {
     try {
       setIsLoading(true);
+      onLoading(true);
 
       // 폼 데이터 수집
       const formData = collectFormData();
@@ -185,6 +191,7 @@ export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) 
       if (!validateFormData(formData)) {
         setIsValid(false);
         toast.error('필수 입력값을 모두 입력해주세요');
+        onLoading(false);
         return;
       }
 
@@ -197,6 +204,7 @@ export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) 
     } catch (error) {
       console.error('분석 중 오류 발생:', error);
       toast.error('분석 중 오류가 발생했습니다');
+      onLoading(false);
     } finally {
       setIsLoading(false);
     }
