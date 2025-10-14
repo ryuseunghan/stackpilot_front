@@ -10,22 +10,11 @@ import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { analyzeWithOpenAI, AnalysisRequest, AnalysisResult } from '@/services/openai';
 
-interface Endpoint {
-  id: string;
-  name: string;
-  avgRps: string;
-  peakRps: string;
-  p50: string;
-  p95: string;
-}
-
 interface ExternalIntegration {
   id: string;
   name: string;
   criticality: string;
   callType: string;
-  timeout: string;
-  retries: string;
   idempotencyKey: string;
 }
 
@@ -33,27 +22,26 @@ interface DatabaseEnvironment {
   id: string;
   database: string;
   version: string;
-  cloud: string;
 }
 
-export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) => void }) {
+interface InputPageProps {
+  onAnalyze: (result?: AnalysisResult) => void;
+  onLoading: (isLoading: boolean) => void;
+}
+
+export function InputPage({ onAnalyze, onLoading }: InputPageProps) {
   const [isValid, setIsValid] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [ignoreLoad, setIgnoreLoad] = useState(false);
   const [stepType, setStepType] = useState<'new' | 'refactoring'>('refactoring');
   const [considerations, setConsiderations] = useState<{ id: string; value: string }[]>([
     { id: '1', value: '외부 SMS API 실패 시에도 매칭은 성공 처리되어야 함' }
   ]);
-  const [endpoints, setEndpoints] = useState<Endpoint[]>([
-    { id: '1', name: '매칭 신청', avgRps: '120', peakRps: '450', p50: '800', p95: '1500' },
-    { id: '2', name: '매칭 수락', avgRps: '80', peakRps: '300', p50: '1200', p95: '2400' },
-  ]);
   const [externals, setExternals] = useState<ExternalIntegration[]>([
-    { id: '1', name: 'sms_provider', criticality: 'non-critical', callType: 'sync', timeout: '1000', retries: '1', idempotencyKey: '매칭된 각 회원들에게 sms를 전송하는 외부 api' },
-    { id: '2', name: 'recommendation_api', criticality: 'non-critical', callType: 'sync', timeout: '800', retries: '0', idempotencyKey: 'db 상에 있는 회원들 중 이상형 데이터와 가장 유사한 회원을 추천해주는 api' },
+    { id: '1', name: 'sms_provider', criticality: 'non-critical', callType: 'sync', idempotencyKey: '매칭된 각 회원들에게 sms를 전송하는 외부 api' },
+    { id: '2', name: 'recommendation_api', criticality: 'non-critical', callType: 'sync', idempotencyKey: 'db 상에 있는 회원들 중 이상형 데이터와 가장 유사한 회원을 추천해주는 api' },
   ]);
   const [databases, setDatabases] = useState<DatabaseEnvironment[]>([
-    { id: '1', database: 'mysql', version: '8.0', cloud: 'aws-ec2' },
+    { id: '1', database: 'mysql', version: '8.0' },
   ]);
 
   // 폼 요소에 대한 참조 생성
@@ -75,29 +63,12 @@ export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) 
     return () => clearTimeout(timer);
   }, []);
 
-  const addEndpoint = () => {
-    setEndpoints([...endpoints, {
-      id: Date.now().toString(),
-      name: '',
-      avgRps: '',
-      peakRps: '',
-      p50: '',
-      p95: ''
-    }]);
-  };
-
-  const removeEndpoint = (id: string) => {
-    setEndpoints(endpoints.filter(e => e.id !== id));
-  };
-
   const addExternal = () => {
     setExternals([...externals, {
       id: Date.now().toString(),
       name: '',
       criticality: 'non-critical',
       callType: 'sync',
-      timeout: '',
-      retries: '0',
       idempotencyKey: ''
     }]);
   };
@@ -121,7 +92,6 @@ export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) 
       id: Date.now().toString(),
       database: 'mysql',
       version: '',
-      cloud: 'aws-ec2'
     }]);
   };
 
@@ -155,7 +125,6 @@ export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) 
     const dbData = databases.map(db => ({
       database: db.database,
       version: db.version,
-      cloud: db.cloud
     }));
 
     // 고려사항 수집 (텍스트 영역에서 값 가져오기)
@@ -213,6 +182,7 @@ export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) 
   const handleAnalyzeClick = async () => {
     try {
       setIsLoading(true);
+      onLoading(true);
 
       // 폼 데이터 수집
       const formData = collectFormData();
@@ -221,6 +191,7 @@ export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) 
       if (!validateFormData(formData)) {
         setIsValid(false);
         toast.error('필수 입력값을 모두 입력해주세요');
+        onLoading(false);
         return;
       }
 
@@ -233,6 +204,7 @@ export function InputPage({ onAnalyze }: { onAnalyze: (result?: AnalysisResult) 
     } catch (error) {
       console.error('분석 중 오류 발생:', error);
       toast.error('분석 중 오류가 발생했습니다');
+      onLoading(false);
     } finally {
       setIsLoading(false);
     }

@@ -12,7 +12,6 @@ export interface AnalysisRequest {
     databases: Array<{
       database: string;
       version: string;
-      cloud: string;
     }>;
   };
   goal: {
