@@ -32,6 +32,8 @@ export default function Home() {
         }
     };
 
+    const shouldShowSideNav = currentPage === 'input';
+
     return (
         <div className="size-full flex flex-col bg-background">
             <Header
@@ -40,7 +42,7 @@ export default function Home() {
                 hasSelectedOptions={selectedOptions.length > 0}
             />
             <div className="flex flex-1 overflow-hidden">
-                {currentPage !== 'adr' && (
+                {shouldShowSideNav && (
                     <SideNav currentPage={currentPage} />
                 )}
                 <main className="flex-1 overflow-auto">
