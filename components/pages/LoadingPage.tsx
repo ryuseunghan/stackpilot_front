@@ -12,7 +12,7 @@ const loadingSteps: LoadingStep[] = [
   { id: 1, message: '입력된 데이터를 수집하는 중...', delay: 5000, icon: Database },
   { id: 2, message: '프로젝트 환경을 분석하는 중...', delay: 7000, icon: Search },
   { id: 3, message: '외부 연동 정보를 확인하는 중...', delay: 10000, icon: Link2 },
-  { id: 4, message: '개선 방안을 도출하는 중...', delay: 20000, icon: Lightbulb },
+  { id: 4, message: '개선 방안을 도출하는 중...', delay: 200000, icon: Lightbulb },
 ];
 
 type StepStatus = 'pending' | 'active' | 'completed';
