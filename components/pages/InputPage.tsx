@@ -412,6 +412,7 @@ export function InputPage({ onAnalyze, onLoading }: InputPageProps) {
                     <Textarea
                         id="feature-summary"
                         placeholder="신규 기능에 대한 설명을 입력하세요"
+                        defaultValue="신규"
                         rows={2}
                         ref={featureSummaryRef}
                     />
