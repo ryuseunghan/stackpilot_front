@@ -44,6 +44,11 @@ export function InputPage({ onAnalyze, onLoading }: InputPageProps) {
     { id: '1', database: 'mysql', version: '8.0' },
   ]);
 
+  // 각 스텝 타입별 텍스트 영역 상태 관리
+  const [featureSummary, setFeatureSummary] = useState<string>("신규 기능에 대한 설명을 입력하세요");
+  const [currentState, setCurrentState] = useState<string>("매칭 신청 API가 외부 API인 SMS 전송 API를 동기로 처리하여 시간 소요가 크며, SMS 전송 실패 시 매칭 신청까지 실패 됨");
+  const [desiredState, setDesiredState] = useState<string>("매칭 신청 API의 속도를 개선하고, SMS 전송이 실패하더라도 매칭 신청 API는 성공 되게끔 개선");
+
   // 폼 요소에 대한 참조 생성
   const frameworkRef = useRef<HTMLSelectElement>(null);
   const versionRef = useRef<HTMLInputElement>(null);
@@ -62,6 +67,20 @@ export function InputPage({ onAnalyze, onLoading }: InputPageProps) {
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  // stepType이 변경될 때 텍스트 영역 초기화
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (stepType === 'new' && featureSummaryRef.current) {
+        featureSummaryRef.current.value = featureSummary;
+      } else if (stepType === 'refactoring') {
+        if (currentStateRef.current) currentStateRef.current.value = currentState;
+        if (desiredStateRef.current) desiredStateRef.current.value = desiredState;
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [stepType, featureSummary, currentState, desiredState]);
 
   const addExternal = () => {
     setExternals([...externals, {
@@ -99,6 +118,14 @@ export function InputPage({ onAnalyze, onLoading }: InputPageProps) {
     if (databases.length > 1) {
       setDatabases(databases.filter(d => d.id !== id));
     }
+  };
+
+  /**
+   * stepType 변경 핸들러
+   * 스텝 타입이 변경될 때 관련 상태를 초기화합니다.
+   */
+  const handleStepTypeChange = (value: string) => {
+    setStepType(value as 'new' | 'refactoring');
   };
 
   /**
@@ -145,19 +172,19 @@ export function InputPage({ onAnalyze, onLoading }: InputPageProps) {
     let goalData: AnalysisRequest['goal'];
 
     if (stepType === 'new') {
-      const featureSummary = document.getElementById('feature-summary') as HTMLTextAreaElement;
+      const featureSummaryElement = document.getElementById('feature-summary') as HTMLTextAreaElement;
       goalData = {
         stepType: 'new',
-        featureSummary: featureSummary?.value || '',
+        featureSummary: featureSummaryElement?.value || '',
         considerations: considerationValues
       };
     } else {
-      const currentState = document.getElementById('current-state') as HTMLTextAreaElement;
-      const desiredState = document.getElementById('desired-state') as HTMLTextAreaElement;
+      const currentStateElement = document.getElementById('current-state') as HTMLTextAreaElement;
+      const desiredStateElement = document.getElementById('desired-state') as HTMLTextAreaElement;
       goalData = {
         stepType: 'refactoring',
-        currentState: currentState?.value || '',
-        desiredState: desiredState?.value || '',
+        currentState: currentStateElement?.value || '',
+        desiredState: desiredStateElement?.value || '',
         considerations: considerationValues
       };
     }
@@ -234,7 +261,6 @@ export function InputPage({ onAnalyze, onLoading }: InputPageProps) {
     } else {
       if (!data.goal.currentState || !data.goal.desiredState) return false;
     }
-
     return true;
   };
 
@@ -261,7 +287,7 @@ export function InputPage({ onAnalyze, onLoading }: InputPageProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="version">버전 *</Label>
-                <Input id="version" defaultValue="2.7.x" />
+                <Input id="version" defaultValue="2.7.1" />
               </div>
             </div>
 
@@ -392,7 +418,10 @@ export function InputPage({ onAnalyze, onLoading }: InputPageProps) {
           <div className="space-y-6">
             <div className="space-y-2">
               <Label>스텝 *</Label>
-              <RadioGroup value={stepType} onValueChange={(value) => setStepType(value as 'new' | 'refactoring')}>
+              <RadioGroup
+                  value={stepType}
+                  onValueChange={handleStepTypeChange}
+              >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="new" id="step-new" />
                   <Label htmlFor="step-new" className="cursor-pointer">신규</Label>
@@ -412,8 +441,10 @@ export function InputPage({ onAnalyze, onLoading }: InputPageProps) {
                     <Textarea
                         id="feature-summary"
                         placeholder="신규 기능에 대한 설명을 입력하세요"
+                        defaultValue="신규"
                         rows={2}
                         ref={featureSummaryRef}
+                        onChange={(e) => setFeatureSummary(e.target.value)}
                     />
                   </div>
                 </>
@@ -423,9 +454,10 @@ export function InputPage({ onAnalyze, onLoading }: InputPageProps) {
                     <Label htmlFor="current-state">현재 기능 상태(as-is) *</Label>
                     <Textarea
                         id="current-state"
-                        defaultValue="매칭 신청 API가 외부 API인 SMS 전송 API를 동기로 처리하여 시간 소요가 크며, SMS 전송 실패 시 매칭 신청까지 실패 됨"
+                        defaultValue={currentState}
                         rows={2}
                         ref={currentStateRef}
+                        onChange={(e) => setCurrentState(e.target.value)}
                     />
                   </div>
 
@@ -433,9 +465,10 @@ export function InputPage({ onAnalyze, onLoading }: InputPageProps) {
                     <Label htmlFor="desired-state">희망 개선 사항(to-be) *</Label>
                     <Textarea
                         id="desired-state"
-                        defaultValue="매칭 신청 API의 속도를 개선하고, SMS 전송이 실패하더라도 매칭 신청 API는 성공 되게끔 개선"
+                        defaultValue={desiredState}
                         rows={2}
                         ref={desiredStateRef}
+                        onChange={(e) => setDesiredState(e.target.value)}
                     />
                   </div>
                 </>
