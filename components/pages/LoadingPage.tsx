@@ -6,30 +6,39 @@ interface LoadingStep {
   message: string;
   delay: number;
   icon: React.ElementType;
+  isInfinite?: boolean; // 무한 로딩 단계를 나타내는 플래그
+}
+
+interface LoadingPageProps {
+  onLoadingComplete?: () => void;
 }
 
 const loadingSteps: LoadingStep[] = [
-  { id: 1, message: '입력된 데이터를 수집하는 중...', delay: 5000, icon: Database },
-  { id: 2, message: '프로젝트 환경을 분석하는 중...', delay: 7000, icon: Search },
-  { id: 3, message: '외부 연동 정보를 확인하는 중...', delay: 10000, icon: Link2 },
-  { id: 4, message: '개선 방안을 도출하는 중...', delay: 200000, icon: Lightbulb },
+  { id: 1, message: '입력된 데이터를 수집하는 중...', delay: 50000, icon: Database },
+  { id: 2, message: '프로젝트 환경을 분석하는 중...', delay: 70000, icon: Search },
+  { id: 3, message: '외부 연동 정보를 확인하는 중...', delay: 100000, icon: Link2 },
+  { id: 4, message: '개선 방안을 도출하는 중...', delay: Infinity, icon: Lightbulb, isInfinite: true },
 ];
 
 type StepStatus = 'pending' | 'active' | 'completed';
 
-export function LoadingPage() {
+export function LoadingPage({ onLoadingComplete }: LoadingPageProps = {}) {
   const [currentStep, setCurrentStep] = useState(1);
 
   useEffect(() => {
-    const timers = loadingSteps.map((step, index) => {
-      const totalDelay = loadingSteps
-          .slice(0, index)
-          .reduce((sum, s) => sum + s.delay, 0);
+    // 무한 로딩이 아닌 단계들만 타이머 설정
+    const timers = loadingSteps
+        .filter(step => !step.isInfinite)
+        .map((step, index) => {
+          const totalDelay = loadingSteps
+              .slice(0, index)
+              .filter(s => !s.isInfinite) // 무한 로딩 단계는 지연 시간 계산에서 제외
+              .reduce((sum, s) => sum + s.delay, 0);
 
-      return setTimeout(() => {
-        setCurrentStep(step.id + 1);
-      }, totalDelay);
-    });
+          return setTimeout(() => {
+            setCurrentStep(step.id + 1);
+          }, totalDelay);
+        });
 
     return () => {
       timers.forEach(timer => clearTimeout(timer));
@@ -42,7 +51,16 @@ export function LoadingPage() {
     return 'pending';
   };
 
-  const progress = ((currentStep - 1) / loadingSteps.length) * 100;
+  // 마지막 단계는 진행률 계산에서 제외하여 100%에 도달하지 않도록 함
+  const nonInfiniteSteps = loadingSteps.filter(step => !step.isInfinite);
+  const lastCompletableStepId = nonInfiniteSteps.length > 0
+      ? nonInfiniteSteps[nonInfiniteSteps.length - 1].id
+      : 0;
+
+  // 현재 단계가 마지막 완료 가능한 단계를 넘어가면 진행률을 95%로 고정
+  const progress = currentStep > lastCompletableStepId
+      ? 95
+      : ((currentStep - 1) / nonInfiniteSteps.length) * 95; // 최대 95%까지만 진행
 
   return (
       <div className="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
