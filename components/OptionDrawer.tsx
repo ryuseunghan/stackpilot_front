@@ -91,11 +91,11 @@ export function OptionDrawer({ open, onOpenChange, option }: OptionDrawerProps) 
 
             <div>
               <h3 className="text-sm font-medium mb-2">구현 단계</h3>
-              <ol className="list-decimal pl-5 space-y-1 text-muted-foreground">
+              <ul className="list-none pl-1 space-y-1 text-muted-foreground">
                 {option.steps.map((step, index) => (
-                    <li key={index}>{step}</li>
+                    <li key={index} className="pb-1">{step}</li>
                 ))}
-              </ol>
+              </ul>
             </div>
           </div>
 
