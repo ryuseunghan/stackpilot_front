@@ -79,6 +79,12 @@ export function generateAnalysisPrompt(input: PromptInput): string {
 사용자가 제공한 프로젝트 정보를 바탕으로 실행 가능한 아키텍처 옵션을 제안하고,
 각 옵션의 장단점을 근거와 함께 분석해주세요.
 
+## 출력 언어 고정(매우 중요)
+- 응답의 본문과 JSON의 **모든 문자열 값**은 한국어(ko-KR)로만 작성하세요.
+- **JSON의 키 이름은 제공된 스키마대로 영어를 그대로 유지**하세요 (id, name, tags, summary 등).
+- 고유명사/제품명/라이브러리명/URL은 원문 표기를 허용하되, **설명 문장은 한국어**로 쓰세요.
+- 문장 단위로 영어가 포함되었다면 **전체 응답을 한국어로 즉시 다시 작성**하세요.
+
 ## 프로젝트 환경
 - 프레임워크: ${environment.framework} ${environment.version}
 - 언어: ${environment.language}
@@ -106,7 +112,6 @@ ${externalsInfo ? `## 외부 연동\n${externalsInfo}` : ''}
 8. 전제 조건: 적용을 위한 필수 조건 3-4개
 9. 구현 단계: 구체적 실행 단계 5개 내외 각
 10. 근거: 각 옵션마다 3-5개의 신뢰할 수 있는 근거/레퍼런스 (URL 또는 출처명 포함)
-11. 한국어로 답변 생성
 
 응답은 아래 JSON 형식으로 제공해주세요:
 
